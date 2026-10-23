@@ -12,6 +12,7 @@ const searchInput = document.querySelector('#search-input');
 const sortSelect = document.querySelector('#sort-select');
 const importFile = document.querySelector('#import-file');
 const toast = document.querySelector('#toast');
+const themeToggle = document.querySelector('#theme-toggle');
 let tasks = loadTasks();
 let activeFilter = 'all';
 let toastTimer;
@@ -338,5 +339,15 @@ document.addEventListener('keydown', (event) => {
   }
 });
 document.querySelector('#today-label').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
+
+function setTheme(theme) {
+  document.body.dataset.theme = theme;
+  themeToggle.textContent = theme === 'dark' ? '☀ Light' : '☾ Dark';
+  themeToggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
+  localStorage.setItem('studyflow.theme', theme);
+}
+
+setTheme(localStorage.getItem('studyflow.theme') || 'dark');
+themeToggle.addEventListener('click', () => setTheme(document.body.dataset.theme === 'dark' ? 'light' : 'dark'));
 
 displayTasks();
