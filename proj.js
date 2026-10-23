@@ -67,12 +67,22 @@ function isOverdue(task) {
   return new Date(`${task.dueDate}T00:00:00`) < today;
 }
 
+function searchTasks(taskItems, query) {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  if (!normalizedQuery) return [...taskItems];
+  return taskItems.filter((task) => `${task.title} ${task.category} ${task.priority}`.toLocaleLowerCase().includes(normalizedQuery));
+}
+
+function filterTasks(taskItems, filter) {
+  if (filter === 'completed') return taskItems.filter((task) => task.completed);
+  if (filter === 'pending') return taskItems.filter((task) => !task.completed);
+  return [...taskItems];
+}
+
 function getVisibleTasks() {
   const query = searchInput.value.trim().toLocaleLowerCase();
   const priorityOrder = { high: 0, medium: 1, low: 2 };
-  return tasks
-    .filter((task) => activeFilter === 'all' || (activeFilter === 'completed' ? task.completed : !task.completed))
-    .filter((task) => `${task.title} ${task.category} ${task.priority}`.toLocaleLowerCase().includes(query))
+  return searchTasks(filterTasks(tasks, activeFilter), query)
     .sort((a, b) => {
       if (a.completed !== b.completed) return Number(a.completed) - Number(b.completed);
       if (sortSelect.value === 'due') return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31') || b.createdAt - a.createdAt;
