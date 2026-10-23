@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08090b">
+  <title>Studyflow — Student Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="proj.css">
+  <script src="proj.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Studyflow home">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <span>study<span class="brand-light">flow</span></span>
+      </a>
+
+      <div class="sidebar-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="Task filters">
+        <button class="nav-item is-active" data-filter="all" type="button"><span class="nav-icon">▦</span> All tasks <span class="nav-count" id="all-nav-count">0</span></button>
+        <button class="nav-item" data-filter="pending" type="button"><span class="nav-icon">◷</span> In progress <span class="nav-count" id="pending-nav-count">0</span></button>
+        <button class="nav-item" data-filter="completed" type="button"><span class="nav-icon">✓</span> Completed</button>
+      </nav>
+
+      <div class="sidebar-note">
+        <div class="note-sparkle">01 / 03</div>
+        <p class="note-title">Plan it.<br>Finish it.</p>
+        <p class="note-copy">Keep the next step clear.</p>
+        <div class="note-orbit orbit-one"></div>
+        <div class="note-orbit orbit-two"></div>
+      </div>
+
+      <div class="sidebar-footer"><span class="online-dot"></span> Your work is saved automatically</div>
+    </aside>
+
+    <main class="main-content" id="top">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Workspace</span><span class="crumb-slash">/</span><strong>My tasks</strong></div>
+        <div class="topbar-right"><span class="today-chip" id="today-label"></span><div class="avatar" aria-label="Student profile">S</div></div>
+      </header>
+
+      <section class="welcome-section" aria-labelledby="welcome-title">
+        <div class="welcome-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> STUDENT TASK MANAGER</p>
+          <h1 id="welcome-title">Tasks, in<br><span class="headline-accent">focus.</span></h1>
+          <p class="welcome-subtitle">Plan your week. Finish what matters.</p>
+        </div>
+        <div class="welcome-art" aria-hidden="true">
+          <div class="art-glow"></div><div class="art-ring ring-back"></div><div class="art-ring ring-front"></div>
+          <div class="art-card"><span class="art-check">✓</span><span class="art-card-line line-long"></span><span class="art-card-line line-short"></span></div>
+          <span class="art-star star-a">✦</span><span class="art-star star-b">✳</span><span class="art-dot"></span>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Task overview">
+        <article class="stat-card stat-total"><div class="stat-top"><span class="stat-label">TOTAL TASKS</span><span class="stat-icon">▦</span></div><div class="stat-value" id="total-stat">0</div><div class="stat-foot">Across all categories</div></article>
+        <article class="stat-card stat-pending"><div class="stat-top"><span class="stat-label">PENDING</span><span class="stat-icon">◷</span></div><div class="stat-value" id="pending-stat">0</div><div class="stat-foot">Not completed yet</div></article>
+        <article class="stat-card stat-done"><div class="stat-top"><span class="stat-label">COMPLETED</span><span class="stat-icon">✓</span></div><div class="stat-value" id="completed-stat">0</div><div class="stat-foot"><span id="progress-label">0% of your tasks</span><span class="mini-progress"><span id="mini-progress-fill"></span></span></div></article>
+      </section>
+
+      <section class="task-section" aria-labelledby="tasks-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow section-eyebrow">YOUR WORK</p><h2 id="tasks-heading">Task list<span class="heading-period">.</span></h2></div>
+          <button class="clear-button" id="clear-completed" type="button" hidden>Clear completed <span aria-hidden="true">↗</span></button>
+        </div>
+
+        <form class="add-task-form" id="task-form">
+          <label class="sr-only" for="task-input">What do you need to get done?</label>
+          <span class="input-plus" aria-hidden="true">＋</span>
+          <input id="task-input" name="task" type="text" maxlength="120" placeholder="What do you need to get done?" autocomplete="off" required>
+          <select id="task-category" aria-label="Task category">
+            <option value="Study">Study</option><option value="Assignment">Assignment</option><option value="Personal">Personal</option><option value="Project">Project</option>
+          </select>
+          <select id="task-priority" aria-label="Task priority">
+            <option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option>
+          </select>
+          <input id="task-due" class="due-input" type="date" aria-label="Due date">
+          <button class="add-button" type="submit"><span>Add task</span><span class="button-arrow" aria-hidden="true">↗</span></button>
+        </form>
+
+        <div class="task-toolbar">
+          <div class="filter-tabs" role="group" aria-label="Filter tasks">
+            <button class="filter-tab is-active" data-filter="all" type="button">All <span id="all-tab-count">0</span></button>
+            <button class="filter-tab" data-filter="pending" type="button">Pending</button>
+            <button class="filter-tab" data-filter="completed" type="button">Completed</button>
+          </div>
+          <div class="toolbar-tools">
+            <label class="sort-control"><span class="sr-only">Sort tasks</span><select id="sort-select"><option value="created">Recently added</option><option value="due">Due date</option><option value="priority">Priority</option></select></label>
+            <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Search tasks</span><input id="search-input" type="search" placeholder="Search tasks..." autocomplete="off"></label>
+          </div>
+        </div>
+
+        <div class="data-tools" aria-label="Task data tools">
+          <span>Backup your task list</span>
+          <div><button class="text-button" id="export-json" type="button">Export JSON <span aria-hidden="true">↓</span></button><button class="text-button" id="import-json" type="button">Import JSON <span aria-hidden="true">↑</span></button><input id="import-file" type="file" accept=".json,application/json" hidden></div>
+        </div>
+
+        <div class="task-list" id="task-list" aria-live="polite"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <div class="empty-illustration" aria-hidden="true"><span>✦</span><div class="empty-page"><i></i><i></i><i></i></div></div>
+          <h3 id="empty-title">No tasks yet</h3><p id="empty-copy">Add a task to get started.</p>
+          <button class="empty-cta" id="empty-cta" type="button">Create a task <span>↗</span></button>
+        </div>
+        <footer class="list-footer"><span id="list-summary">0 tasks</span><span><span class="footer-pulse"></span> Synced to this device</span></footer>
+      </section>
+      <footer class="page-footer">Studyflow <span>·</span> Tasks stay on this device</footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
