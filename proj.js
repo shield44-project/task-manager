@@ -43,9 +43,11 @@ function loadTasks() {
 function saveTasks() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    return true;
   } catch (error) {
     console.error('Could not save tasks:', error);
     showToast('Storage is unavailable. Your changes may not persist.');
+    return false;
   }
 }
 
@@ -67,12 +69,22 @@ function isOverdue(task) {
   return new Date(`${task.dueDate}T00:00:00`) < today;
 }
 
+function searchTasks(taskItems, query) {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  if (!normalizedQuery) return [...taskItems];
+  return taskItems.filter((task) => `${task.title} ${task.category} ${task.priority}`.toLocaleLowerCase().includes(normalizedQuery));
+}
+
+function filterTasks(taskItems, filter) {
+  if (filter === 'completed') return taskItems.filter((task) => task.completed);
+  if (filter === 'pending') return taskItems.filter((task) => !task.completed);
+  return [...taskItems];
+}
+
 function getVisibleTasks() {
   const query = searchInput.value.trim().toLocaleLowerCase();
   const priorityOrder = { high: 0, medium: 1, low: 2 };
-  return tasks
-    .filter((task) => activeFilter === 'all' || (activeFilter === 'completed' ? task.completed : !task.completed))
-    .filter((task) => `${task.title} ${task.category} ${task.priority}`.toLocaleLowerCase().includes(query))
+  return searchTasks(filterTasks(tasks, activeFilter), query)
     .sort((a, b) => {
       if (a.completed !== b.completed) return Number(a.completed) - Number(b.completed);
       if (sortSelect.value === 'due') return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31') || b.createdAt - a.createdAt;
@@ -81,7 +93,7 @@ function getVisibleTasks() {
     });
 }
 
-function renderTasks() {
+function displayTasks() {
   const visibleTasks = getVisibleTasks();
   taskList.replaceChildren();
 
@@ -94,7 +106,7 @@ function renderTasks() {
     check.className = 'task-check';
     check.type = 'button';
     check.setAttribute('aria-label', task.completed ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`);
-      check.textContent = '✓';
+    check.textContent = '✓';
     check.addEventListener('click', () => toggleTask(task.id));
 
     const details = document.createElement('div');
@@ -186,31 +198,40 @@ function setFilter(filter) {
       else button.removeAttribute('aria-current');
     }
   });
-  renderTasks();
+  displayTasks();
 }
 
 function addTask(title, category, priority, dueDate) {
-  tasks.unshift({ id: createId(), title: title.trim(), category, priority, dueDate, completed: false, createdAt: Date.now() });
+  const cleanTitle = title.trim();
+  if (!cleanTitle) {
+    taskInput.focus();
+    return false;
+  }
+  tasks.unshift({ id: createId(), title: cleanTitle, category, priority, dueDate, completed: false, createdAt: Date.now() });
   saveTasks();
   setFilter('all');
   showToast('Task added.');
+  return true;
 }
 
 function toggleTask(id) {
   const task = tasks.find((item) => item.id === id);
-  if (!task) return;
+  if (!task) return false;
   task.completed = !task.completed;
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast(task.completed ? 'Task completed.' : 'Task moved to pending.');
+  return true;
 }
 
 function deleteTask(id) {
   const task = tasks.find((item) => item.id === id);
+  if (!task) return false;
   tasks = tasks.filter((item) => item.id !== id);
   saveTasks();
-  renderTasks();
-  if (task) showToast('Task deleted.');
+  displayTasks();
+  showToast('Task deleted.');
+  return true;
 }
 
 function editTask(id) {
@@ -225,7 +246,7 @@ function editTask(id) {
   }
   task.title = cleanTitle.slice(0, 120);
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast('Task updated.');
 }
 
@@ -270,19 +291,15 @@ async function importTasks(file) {
 
 taskForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const title = taskInput.value.trim();
-  if (!title) {
-    taskInput.focus();
-    return;
-  }
-  addTask(title, categoryInput.value, priorityInput.value, dueInput.value);
+  const didAddTask = addTask(taskInput.value, categoryInput.value, priorityInput.value, dueInput.value);
+  if (!didAddTask) return;
   taskForm.reset();
   priorityInput.value = 'medium';
   taskInput.focus();
 });
 
-searchInput.addEventListener('input', renderTasks);
-sortSelect.addEventListener('change', renderTasks);
+searchInput.addEventListener('input', displayTasks);
+sortSelect.addEventListener('change', displayTasks);
 document.querySelectorAll('[data-filter]').forEach((button) => {
   button.addEventListener('click', () => setFilter(button.dataset.filter));
 });
@@ -291,7 +308,7 @@ document.querySelector('#clear-completed').addEventListener('click', () => {
   if (!completedCount) return;
   tasks = tasks.filter((task) => !task.completed);
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast(`${completedCount} completed ${completedCount === 1 ? 'task' : 'tasks'} cleared.`);
 });
 document.querySelector('#empty-cta').addEventListener('click', () => taskInput.focus());
@@ -301,7 +318,7 @@ importFile.addEventListener('change', () => importTasks(importFile.files[0]));
 window.addEventListener('storage', (event) => {
   if (event.key === STORAGE_KEY) {
     tasks = loadTasks();
-    renderTasks();
+    displayTasks();
     showToast('Task list updated in another tab.');
   }
 });
@@ -316,10 +333,10 @@ document.addEventListener('keydown', (event) => {
   }
   if (event.key === 'Escape' && document.activeElement === searchInput) {
     searchInput.value = '';
-    renderTasks();
+    displayTasks();
     searchInput.blur();
   }
 });
 document.querySelector('#today-label').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
 
-renderTasks();
+displayTasks();

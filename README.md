@@ -2,6 +2,8 @@
 
 A lightweight task manager built with plain HTML, CSS, and JavaScript. It runs in the browser without a framework, build step, or server.
 
+The JavaScript keeps the main actions in easy-to-follow functions: `addTask`, `deleteTask`, `toggleTask`, `displayTasks`, `searchTasks`, `filterTasks`, `saveTasks`, and `loadTasks`.
+
 ## Run it
 
 Open `proj.html` in a modern browser. Tasks are stored in that browser's Local Storage and stay on the device. Clearing browser site data removes them. JSON backup can be used to move tasks to another browser/device.
@@ -24,14 +26,14 @@ Open `proj.html` in a modern browser. Tasks are stored in that browser's Local S
 | File | Role |
 | --- | --- |
 | `proj.html` | Semantic page structure, forms, buttons, filters, and labels. |
-| `proj.css` | Near-black interface, responsive layout, visual states, transforms, transitions, and keyframe animations. |
+| `proj.css` | Near-black interface, responsive layout, simple transforms, transitions, and keyframe animations. |
 | `proj.js` | Task data, validation, Local Storage, JSON import/export, sorting, filtering, and DOM updates. |
 
 ## JavaScript concepts demonstrated
 
 - **Variables and constants:** DOM references, the task array, filter state, and the storage key.
 - **Objects and arrays:** each task is an object; `tasks` is an array of task objects.
-- **Functions:** small functions handle rendering, saving, filtering, adding, editing, importing, and more.
+- **Functions:** `addTask`, `deleteTask`, `toggleTask`, `displayTasks`, `searchTasks`, `filterTasks`, `saveTasks`, and `loadTasks` handle the core task actions. Smaller helpers cover editing, dates, statistics, and JSON backup.
 - **Conditions:** input checks, task status, due dates, filtering, and JSON error handling.
 - **Loops and array methods:** `forEach`, `filter`, `map`, `find`, `sort`, and `includes` render and transform task data.
 - **DOM manipulation:** create elements, update text and attributes, change classes, and replace list contents.
@@ -60,6 +62,6 @@ Exported backups are JSON objects containing the app name, version, export time,
 ## Notes
 
 - The app uses no JavaScript packages or external services.
-- Google Fonts are linked in `proj.html` and `proj.css`; if unavailable, the browser uses fallback fonts.
+- The interface uses system fonts and does not need external font downloads.
 - Storage is browser-specific and is not encrypted or synced to an online account.
 - Import merges tasks with the current list; duplicate IDs are assigned new IDs.
