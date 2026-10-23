@@ -81,7 +81,7 @@ function getVisibleTasks() {
     });
 }
 
-function renderTasks() {
+function displayTasks() {
   const visibleTasks = getVisibleTasks();
   taskList.replaceChildren();
 
@@ -186,14 +186,20 @@ function setFilter(filter) {
       else button.removeAttribute('aria-current');
     }
   });
-  renderTasks();
+  displayTasks();
 }
 
 function addTask(title, category, priority, dueDate) {
+  const cleanTitle = title.trim();
+  if (!cleanTitle) {
+    taskInput.focus();
+    return false;
+  }
   tasks.unshift({ id: createId(), title: title.trim(), category, priority, dueDate, completed: false, createdAt: Date.now() });
   saveTasks();
-  setFilter('all');
+  displayTasks();
   showToast('Task added.');
+  return true;
 }
 
 function toggleTask(id) {
@@ -201,7 +207,7 @@ function toggleTask(id) {
   if (!task) return;
   task.completed = !task.completed;
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast(task.completed ? 'Task completed.' : 'Task moved to pending.');
 }
 
@@ -209,7 +215,7 @@ function deleteTask(id) {
   const task = tasks.find((item) => item.id === id);
   tasks = tasks.filter((item) => item.id !== id);
   saveTasks();
-  renderTasks();
+  displayTasks();
   if (task) showToast('Task deleted.');
 }
 
@@ -225,7 +231,7 @@ function editTask(id) {
   }
   task.title = cleanTitle.slice(0, 120);
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast('Task updated.');
 }
 
@@ -270,19 +276,15 @@ async function importTasks(file) {
 
 taskForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const title = taskInput.value.trim();
-  if (!title) {
-    taskInput.focus();
-    return;
-  }
-  addTask(title, categoryInput.value, priorityInput.value, dueInput.value);
+  const didAddTask = addTask(taskInput.value, categoryInput.value, priorityInput.value, dueInput.value);
+  if (!didAddTask) return;
   taskForm.reset();
   priorityInput.value = 'medium';
   taskInput.focus();
 });
 
-searchInput.addEventListener('input', renderTasks);
-sortSelect.addEventListener('change', renderTasks);
+searchInput.addEventListener('input', displayTasks);
+sortSelect.addEventListener('change', displayTasks);
 document.querySelectorAll('[data-filter]').forEach((button) => {
   button.addEventListener('click', () => setFilter(button.dataset.filter));
 });
@@ -291,7 +293,7 @@ document.querySelector('#clear-completed').addEventListener('click', () => {
   if (!completedCount) return;
   tasks = tasks.filter((task) => !task.completed);
   saveTasks();
-  renderTasks();
+  displayTasks();
   showToast(`${completedCount} completed ${completedCount === 1 ? 'task' : 'tasks'} cleared.`);
 });
 document.querySelector('#empty-cta').addEventListener('click', () => taskInput.focus());
@@ -301,7 +303,7 @@ importFile.addEventListener('change', () => importTasks(importFile.files[0]));
 window.addEventListener('storage', (event) => {
   if (event.key === STORAGE_KEY) {
     tasks = loadTasks();
-    renderTasks();
+    displayTasks();
     showToast('Task list updated in another tab.');
   }
 });
@@ -316,10 +318,10 @@ document.addEventListener('keydown', (event) => {
   }
   if (event.key === 'Escape' && document.activeElement === searchInput) {
     searchInput.value = '';
-    renderTasks();
+    displayTasks();
     searchInput.blur();
   }
 });
 document.querySelector('#today-label').textContent = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date());
 
-renderTasks();
+displayTasks();
