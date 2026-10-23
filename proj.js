@@ -43,9 +43,11 @@ function loadTasks() {
 function saveTasks() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    return true;
   } catch (error) {
     console.error('Could not save tasks:', error);
     showToast('Storage is unavailable. Your changes may not persist.');
+    return false;
   }
 }
 
@@ -104,7 +106,7 @@ function displayTasks() {
     check.className = 'task-check';
     check.type = 'button';
     check.setAttribute('aria-label', task.completed ? `Mark ${task.title} as pending` : `Mark ${task.title} as completed`);
-      check.textContent = '✓';
+    check.textContent = '✓';
     check.addEventListener('click', () => toggleTask(task.id));
 
     const details = document.createElement('div');
@@ -205,20 +207,21 @@ function addTask(title, category, priority, dueDate) {
     taskInput.focus();
     return false;
   }
-  tasks.unshift({ id: createId(), title: title.trim(), category, priority, dueDate, completed: false, createdAt: Date.now() });
+  tasks.unshift({ id: createId(), title: cleanTitle, category, priority, dueDate, completed: false, createdAt: Date.now() });
   saveTasks();
-  displayTasks();
+  setFilter('all');
   showToast('Task added.');
   return true;
 }
 
 function toggleTask(id) {
   const task = tasks.find((item) => item.id === id);
-  if (!task) return;
+  if (!task) return false;
   task.completed = !task.completed;
   saveTasks();
   displayTasks();
   showToast(task.completed ? 'Task completed.' : 'Task moved to pending.');
+  return true;
 }
 
 function deleteTask(id) {
