@@ -213,10 +213,12 @@ function toggleTask(id) {
 
 function deleteTask(id) {
   const task = tasks.find((item) => item.id === id);
+  if (!task) return false;
   tasks = tasks.filter((item) => item.id !== id);
   saveTasks();
   displayTasks();
-  if (task) showToast('Task deleted.');
+  showToast('Task deleted.');
+  return true;
 }
 
 function editTask(id) {
